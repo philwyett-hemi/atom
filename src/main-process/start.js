@@ -5,6 +5,7 @@ const path = require('path')
 const temp = require('temp')
 const parseCommandLine = require('./parse-command-line')
 const startCrashReporter = require('../crash-reporter-start')
+const setAtomHomePath = require('../set-atom-home-path')
 
 module.exports = function start (resourcePath, startTime) {
   global.shellStartTime = startTime
@@ -23,7 +24,7 @@ module.exports = function start (resourcePath, startTime) {
   console.log = nslog
 
   const args = parseCommandLine(process.argv.slice(1))
-  setupAtomHome(args)
+  setAtomHomePath(app.getPath('home'))
   setupCompileCache()
 
   if (handleStartupEventWithSquirrel()) {
@@ -77,36 +78,6 @@ function handleStartupEventWithSquirrel () {
   const SquirrelUpdate = require('./squirrel-update')
   const squirrelCommand = process.argv[1]
   return SquirrelUpdate.handleStartupEvent(app, squirrelCommand)
-}
-
-function setupAtomHome ({setPortable}) {
-  if (process.env.ATOM_HOME) {
-    return
-  }
-
-  let atomHome = path.join(app.getPath('home'), '.atom')
-  const AtomPortable = require('./atom-portable')
-
-  if (setPortable && !AtomPortable.isPortableInstall(process.platform, process.env.ATOM_HOME, atomHome)) {
-    try {
-      AtomPortable.setPortable(atomHome)
-    } catch (error) {
-      console.log(`Failed copying portable directory '${atomHome}' to '${AtomPortable.getPortableAtomHomePath()}'`)
-      console.log(`${error.message} ${error.stack}`)
-    }
-  }
-
-  if (AtomPortable.isPortableInstall(process.platform, process.env.ATOM_HOME, atomHome)) {
-    atomHome = AtomPortable.getPortableAtomHomePath()
-  }
-
-  try {
-    atomHome = fs.realpathSync(atomHome)
-  } catch (e) {
-    // Don't throw an error if atomHome doesn't exist.
-  }
-
-  process.env.ATOM_HOME = atomHome
 }
 
 function setupCompileCache () {
