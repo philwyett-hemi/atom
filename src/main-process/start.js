@@ -1,11 +1,10 @@
 const {app} = require('electron')
-const fs = require('fs-plus')
 const nslog = require('nslog')
 const path = require('path')
 const temp = require('temp')
 const parseCommandLine = require('./parse-command-line')
 const startCrashReporter = require('../crash-reporter-start')
-const setAtomHomePath = require('../set-atom-home-path')
+const atomPaths = require('../atom-paths')
 
 module.exports = function start (resourcePath, startTime) {
   global.shellStartTime = startTime
@@ -24,7 +23,8 @@ module.exports = function start (resourcePath, startTime) {
   console.log = nslog
 
   const args = parseCommandLine(process.argv.slice(1))
-  setAtomHomePath(app.getPath('home'))
+  atomPaths.setAtomHome(app.getPath('home'))
+  atomPaths.setUserData()
   setupCompileCache()
 
   if (handleStartupEventWithSquirrel()) {
