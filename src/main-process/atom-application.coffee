@@ -116,7 +116,7 @@ class AtomApplication
       logFile, profileStartup, timeout, clearWindowState, addToLastWindow, env
     } = options
 
-    app.focus()
+    app.focus() unless process.platform is 'win32' # Do not bring to front in case opening a second window
 
     if test
       @runTests({
@@ -535,6 +535,11 @@ class AtomApplication
       openedWindow.openLocations(locationsToOpen)
       if openedWindow.isMinimized()
         openedWindow.restore()
+      if process.platform is 'win32'
+        # Workaround not being able to bring background app to focus
+        openedWindow.setAlwaysOnTop(true)
+        openedWindow.focus()
+        openedWindow.setAlwaysOnTop(false)
       else
         openedWindow.focus()
       openedWindow.replaceEnvironment(env)
