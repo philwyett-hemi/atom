@@ -10,6 +10,10 @@ const temp = require('temp').track()
 describe("AtomPaths", () => {
   const portableAtomHomePath = path.join(path.dirname(process.execPath), '..', '.atom')
 
+  afterEach(() => {
+    atomPaths.setAtomHome(app.getPath('home'))
+  })
+
   describe('SetAtomHomePath', () => {
     describe('when a portable .atom folder exists', () => {
       beforeEach(() => {
